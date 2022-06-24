@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"database/sql/driver"
 	"encoding/binary"
+	"encoding/hex"
 	"errors"
 	"io"
 	"math"
@@ -530,6 +531,20 @@ func (id *ULID) Scan(src interface{}) error {
 //
 func (id ULID) Value() (driver.Value, error) {
 	return id.MarshalBinary()
+}
+
+func (id ULID) ToUUIDString() string {
+	var uuid [36]byte
+	hex.Encode(uuid[:], id[:4])
+	uuid[8] = '-'
+	hex.Encode(uuid[9:13], id[4:6])
+	uuid[13] = '-'
+	hex.Encode(uuid[14:18], id[6:8])
+	uuid[18] = '-'
+	hex.Encode(uuid[19:23], id[8:10])
+	uuid[23] = '-'
+	hex.Encode(uuid[24:], id[10:])
+	return string(uuid[:])
 }
 
 // Monotonic returns an entropy source that is guaranteed to yield
